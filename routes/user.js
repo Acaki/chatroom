@@ -2,14 +2,44 @@ const express = require('express');
 const passport = require('passport');
 const UserService = require('../services/auth');
 const permit = require('../middlewares/permission');
-const authorize = require('../middlewares/authentication');
 
 const router = express.Router();
 
 /* GET users listing. */
-router.get('/', (req, res) => {
-  res.send('respond with a resource');
+router.get('/:id?', permit('admin'), async (req, res) => {
+  res.send(await UserService.getUsers(req.params.id));
 });
+
+router.post('/', permit('admin'), async (req, res) => {
+  if (!req.body.username || !req.body.password) {
+    res.status(400).send('Missing parameter(s).');
+  }
+  try {
+    const newUser = await UserService.createUser(req.body.username, req.body.password);
+    res.send(newUser);
+  } catch (e) {
+    res.status(500).send(e);
+  }
+});
+
+router.patch('/:id', permit('admin'), async (req, res) => {
+  try {
+    await UserService.updateUser(req.params.id, req.body);
+  } catch (e) {
+    res.send(e.message);
+  }
+  res.send('Success.');
+});
+
+router.delete('/:id', permit('admin'), async (req, res) => {
+  try {
+    await UserService.deleteUser(req.params.id);
+  } catch (e) {
+    res.send(e.message);
+  }
+  res.send('Success.');
+});
+
 
 router.post('/login', passport.authenticate(
   'local',
@@ -22,21 +52,15 @@ router.post('/logout', (req, res) => {
 });
 
 router.post('/register', async (req, res) => {
+  if (!req.body.username || !req.body.password) {
+    res.status(400).send('Missing parameter(s).');
+  }
   try {
     const newUser = await UserService.register(req.body.username, req.body.password);
-    res.send(newUser).end();
+    res.send(newUser);
   } catch (e) {
-    res.send(e.message).end();
+    res.status(500).send(e);
   }
-});
-
-router.patch('/role', permit('admin'), async (req, res) => {
-  try {
-    await UserService.updateRole(req.user.name, req.body.role);
-  } catch (e) {
-    res.send(e.message).end();
-  }
-  res.send('Success.');
 });
 
 router.get('/manage', permit('admin'), (req, res) => {

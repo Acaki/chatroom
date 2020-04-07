@@ -16,12 +16,34 @@ module.exports = class UserService {
     });
   }
 
-  static updateRole(username, role) {
-    return User.update({
-      role,
-    }, {
+  static getUsers(id) {
+    if (id) {
+      return User.findByPk(id);
+    }
+    return User.findAll({
+      attributes: ['id', 'name', 'role'],
+    });
+  }
+
+  static updateUser(id, fieldValues) {
+    return User.update(fieldValues, {
       where: {
-        name: username,
+        id,
+      },
+    });
+  }
+
+  static createUser(username, password) {
+    return User.create({
+      name: username,
+      password,
+    });
+  }
+
+  static deleteUser(id) {
+    return User.destroy({
+      where: {
+        id,
       },
     });
   }
