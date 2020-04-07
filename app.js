@@ -6,6 +6,7 @@ const logger = require('morgan');
 const passport = require('passport');
 const LocalStrategy = require('passport-local');
 const bodyParser = require('body-parser');
+const SequelizeStore = require('connect-session-sequelize')(session.Store);
 
 const models = require('./models');
 const indexRouter = require('./routes');
@@ -23,7 +24,16 @@ app.use(express.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(session({ secret: 'anything', resave: true, saveUninitialized: true }));
+app.use(session(
+  {
+    secret: 'anything',
+    resave: false,
+    saveUninitialized: true,
+    store: new SequelizeStore({
+      db: models.sequelize,
+    }),
+  },
+));
 app.use(passport.initialize());
 app.use(passport.session());
 
