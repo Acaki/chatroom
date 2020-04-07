@@ -10,7 +10,7 @@ const SequelizeStore = require('connect-session-sequelize')(session.Store);
 
 const models = require('./models');
 const indexRouter = require('./routes');
-const usersRouter = require('./routes/users');
+const usersRouter = require('./routes/user');
 
 const app = express();
 
@@ -38,7 +38,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
+app.use('/user', usersRouter);
 
 passport.serializeUser((user, done) => {
   done(null, user.id);
