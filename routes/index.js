@@ -13,6 +13,11 @@ router.post('/login', passport.authenticate(
   { successRedirect: '/', failedRedirect: '/login' },
 ));
 
+router.post('/logout', (req, res) => {
+  req.logout();
+  res.send(null);
+});
+
 router.post('/register', async (req, res) => {
   const existingUser = await models.User.findOne({
     where: {

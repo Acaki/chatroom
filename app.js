@@ -1,10 +1,11 @@
 const createError = require('http-errors');
 const express = require('express');
 const path = require('path');
-const cookieParser = require('cookie-parser');
+const session = require('express-session');
 const logger = require('morgan');
 const passport = require('passport');
 const LocalStrategy = require('passport-local');
+const bodyParser = require('body-parser');
 
 const models = require('./models');
 const indexRouter = require('./routes');
@@ -19,20 +20,22 @@ app.set('view engine', 'jade');
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(passport.initialize({}));
-app.use(passport.session({}));
+app.use(session({ secret: 'anything', resave: true, saveUninitialized: true }));
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
 passport.serializeUser((user, done) => {
-  done(null, user);
+  done(null, user.id);
 });
 
-passport.deserializeUser((user, done) => {
-  done(null, user);
+passport.deserializeUser(async (user, done) => {
+  done(null, await models.User.findByPk(user));
 });
 
 passport.use(new LocalStrategy(
