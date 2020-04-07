@@ -1,14 +1,16 @@
-import "reflect-metadata";
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
+const createError = require('http-errors');
+const express = require('express');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const logger = require('morgan');
+const passport = require('passport');
+const LocalStrategy = require('passport-local');
 
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+const models = require('./models');
+const indexRouter = require('./routes');
+const usersRouter = require('./routes/users');
 
-var app = express();
+const app = express();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -19,17 +21,41 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(passport.initialize({}));
+app.use(passport.session({}));
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
+passport.serializeUser((user, done) => {
+  done(null, user);
+});
+
+passport.deserializeUser((user, done) => {
+  done(null, user);
+});
+
+passport.use(new LocalStrategy(
+  async (username, password, done) => {
+    const user = await models.User.findAll({
+      where: {
+        name: username,
+        password,
+      },
+    });
+    if (!user) { return done(null, false); }
+
+    return done(null, user);
+  },
+));
+
 // catch 404 and forward to error handler
-app.use(function(req, res, next) {
+app.use((req, res, next) => {
   next(createError(404));
 });
 
 // error handler
-app.use(function(err, req, res, next) {
+app.use((err, req, res) => {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
