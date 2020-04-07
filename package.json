@@ -3,7 +3,9 @@
    "version": "0.0.0",
    "private": true,
    "scripts": {
-      "start": "ts-node src/index.ts"
+      "start": "node ./bin/www",
+      "devstart": "nodemon ./bin/www",
+      "serverstart": "DEBUG=express-locallibrary-tutorial:* npm run devstart"
    },
    "dependencies": {
       "bcrypt": "^4.0.1",
@@ -34,6 +36,7 @@
       "eslint-plugin-jsx-a11y": "^6.2.3",
       "eslint-plugin-react": "^7.19.0",
       "eslint-plugin-react-hooks": "^2.5.1",
+      "nodemon": "^2.0.2",
       "ts-node": "3.3.0",
       "typescript": "3.3.3333"
    }
