@@ -1,3 +1,5 @@
+const bcrypt = require('bcrypt');
+
 module.exports = (sequelize, DataTypes) => {
   const User = sequelize.define('User', {
     name: {
@@ -13,11 +15,14 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    google_id: DataTypes.STRING,
-    avatar: DataTypes.STRING,
   }, {});
-  User.associate = function(models) {
-    // associations can be defined here
+
+  User.beforeCreate(async (user) => {
+    user.password = await bcrypt.hash(user.password, 10);
+  });
+
+  User.prototype.validPassword = function validPassword(password) {
+    return bcrypt.compare(password, this.password);
   };
   return User;
 };

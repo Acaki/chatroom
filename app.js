@@ -37,13 +37,12 @@ passport.deserializeUser((user, done) => {
 
 passport.use(new LocalStrategy(
   async (username, password, done) => {
-    const user = await models.User.findAll({
+    const user = await models.User.findOne({
       where: {
         name: username,
-        password,
       },
     });
-    if (!user) { return done(null, false); }
+    if (!user || !await user.validPassword(password)) { return done(null, false); }
 
     return done(null, user);
   },
