@@ -5,7 +5,6 @@ const session = require('express-session');
 const logger = require('morgan');
 const passport = require('passport');
 const LocalStrategy = require('passport-local');
-const bodyParser = require('body-parser');
 const SequelizeStore = require('connect-session-sequelize')(session.Store);
 
 const models = require('./models');
@@ -21,8 +20,6 @@ app.set('view engine', 'jade');
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(session(
   {
