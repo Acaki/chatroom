@@ -6,6 +6,7 @@ const logger = require('morgan');
 const passport = require('passport');
 const LocalStrategy = require('passport-local');
 const SequelizeStore = require('connect-session-sequelize')(session.Store);
+const cors = require('cors');
 
 const models = require('./models');
 const indexRouter = require('./routes');
@@ -17,6 +18,7 @@ const app = express();
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
+app.use(cors());
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
