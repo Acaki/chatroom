@@ -6,6 +6,7 @@
 
 const debug = require('debug')('chatroom:server');
 const http = require('http');
+const socketIo = require('socket.io');
 const models = require('../models');
 const app = require('../app');
 
@@ -21,6 +22,17 @@ app.set('port', port);
  */
 
 const server = http.createServer(app);
+const io = socketIo(server);
+io.on('connection', (socket) => {
+  socket.on('message', async (data) => {
+    const { userId, message } = data;
+    const chatMessage = await models.ChatMessages.create({
+      userId,
+      message,
+    });
+    io.emit('newMessage', chatMessage);
+  });
+});
 
 /**
  * Listen on provided port, on all network interfaces.
