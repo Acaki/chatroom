@@ -1,0 +1,18 @@
+extends base.pug
+
+block content
+   table(class='table table-light')
+       thead
+           tr
+               th(scope='col') #
+               th(scope='col') name
+               th(scope='col') role
+       tbody
+           each user in users
+               tr
+                   th(scope='row')= user.id
+                   td= user.name
+                   td= user.role
+
+
+

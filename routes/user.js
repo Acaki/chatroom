@@ -40,15 +40,14 @@ router.delete('/:id', permit('admin'), async (req, res) => {
   res.send('Success.');
 });
 
-
 router.post('/login', (req, res, next) => {
   passport.authenticate('local', (err, user) => {
     if (err) { return next(err); }
-    if (!user) { return res.redirect('login'); }
+    if (!user) { return res.redirect('/login'); }
     return req.logIn(user, (error) => {
       if (error) { return next(err); }
       if (user.role === 'admin') {
-        return res.redirect('/user');
+        return res.redirect('/list_users');
       }
       return res.redirect('/');
     });

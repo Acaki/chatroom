@@ -22,6 +22,7 @@ module.exports = class UserService {
     }
     return User.findAll({
       attributes: ['id', 'name', 'role'],
+      order: [['id', 'ASC']],
     });
   }
 
