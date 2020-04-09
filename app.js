@@ -11,6 +11,7 @@ const cors = require('cors');
 const models = require('./models');
 const indexRouter = require('./routes');
 const usersRouter = require('./routes/user');
+const chatRoomRouter = require('./routes/chatroom');
 
 const app = express();
 
@@ -38,6 +39,7 @@ app.use(passport.session());
 
 app.use('/', indexRouter);
 app.use('/user', usersRouter);
+app.use('/chatroom', chatRoomRouter);
 
 passport.serializeUser((user, done) => {
   done(null, user.id);
