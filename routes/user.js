@@ -48,9 +48,9 @@ router.post('/login', (req, res, next) => {
     return req.logIn(user, (error) => {
       if (error) { return next(err); }
       if (user.role === 'admin') {
-        return res.redirect('/user');
+        return res.json({ loggedUser: user, redirectUri: '/userList' });
       }
-      return res.redirect('/');
+      return res.json({ loggedUser: user, redirectUri: '/chatroom' });
     });
   })(req, res, next);
 });
