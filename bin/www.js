@@ -27,7 +27,7 @@ io.on('connection', (socket) => {
   socket.on('message', async (data) => {
     const { userId, message } = data;
     const chatMessage = await models.ChatMessages.create({
-      userId,
+      user_id: userId,
       message,
     });
     io.emit('newMessage', chatMessage);
