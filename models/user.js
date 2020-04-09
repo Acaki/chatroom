@@ -20,6 +20,11 @@ module.exports = (sequelize, DataTypes) => {
     defaultScope: {
       attributes: { exclude: ['password'] },
     },
+    scopes: {
+      withPassword: {
+        attributes: { include: ['password'] },
+      },
+    },
   });
 
   User.beforeCreate(async (user) => {

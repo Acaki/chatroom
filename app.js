@@ -51,7 +51,7 @@ passport.deserializeUser(async (user, done) => {
 
 passport.use(new LocalStrategy(
   async (username, password, done) => {
-    const user = await models.User.findOne({
+    const user = await models.User.scope('withPassword').findOne({
       where: {
         name: username,
       },
