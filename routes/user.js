@@ -6,22 +6,30 @@ const { DuplicateRegisterError, UserNotExistsError, PasswordInvalidError } = req
 
 const router = express.Router();
 
+async function createUser(req, res) {
+  if (!req.body.username || !req.body.password) {
+    res.status(400).send('Missing parameter(s).');
+  }
+  let newUser;
+  try {
+    newUser = await UserService.register(req.body.username, req.body.password);
+  } catch (e) {
+    if (e instanceof DuplicateRegisterError) {
+      res.status(303).json({ username: e.message });
+    } else {
+      res.status(500).json(e);
+    }
+  }
+
+  return res.json({ loggedUser: newUser, redirectUri: '/chatroom' });
+}
+
 /* GET users listing. */
 router.get('/:id?', permit('admin'), async (req, res) => {
   res.send(await UserService.getUsers(req.params.id));
 });
 
-router.post('/', permit('admin'), async (req, res) => {
-  if (!req.body.username || !req.body.password) {
-    res.status(400).send('Missing parameter(s).');
-  }
-  try {
-    const newUser = await UserService.createUser(req.body.username, req.body.password);
-    res.send(newUser);
-  } catch (e) {
-    res.status(303).send(e);
-  }
-});
+router.post('/', permit('admin'), createUser);
 
 router.patch('/:id', permit('admin'), async (req, res) => {
   try {
@@ -69,21 +77,7 @@ router.post('/logout', (req, res) => {
   res.send(null);
 });
 
-router.post('/register', async (req, res) => {
-  if (!req.body.username || !req.body.password) {
-    res.status(400).send('Missing parameter(s).');
-  }
-  try {
-    const newUser = await UserService.register(req.body.username, req.body.password);
-    return res.json({ loggedUser: newUser, redirectUri: '/chatroom' });
-  } catch (e) {
-    if (e instanceof DuplicateRegisterError) {
-      res.status(303).json({ username: e.message });
-    } else {
-      res.status(500).json(e);
-    }
-  }
-});
+router.post('/register', createUser);
 
 router.get('/manage', permit('admin'), (req, res) => {
   res.send('Access granted!');
