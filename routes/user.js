@@ -66,7 +66,7 @@ router.post('/register', async (req, res) => {
   }
   try {
     const newUser = await UserService.register(req.body.username, req.body.password);
-    res.send(newUser);
+    return res.json({ loggedUser: newUser, redirectUri: '/chatroom' });
   } catch (e) {
     res.status(500).send(e);
   }
