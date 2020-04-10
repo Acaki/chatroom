@@ -1,11 +1,7 @@
 const express = require('express');
 const passport = require('passport');
-const jwt = require('jsonwebtoken');
 const UserService = require('../services/auth');
 const permit = require('../middlewares/permission');
-
-const env = process.env.NODE_ENV || 'development';
-const config = require('../config/config.json')[env];
 const { DuplicateRegisterError, UserNotExistsError, PasswordInvalidError } = require('../services/error');
 
 const router = express.Router();
@@ -29,7 +25,7 @@ async function createUser(req, res) {
 }
 
 /* GET users listing. */
-router.get('/:id?', passport.authenticate('jwt', { session: false }), permit('admin'), async (req, res) => {
+router.get('/:id?', permit('admin'), async (req, res) => {
   res.send(await UserService.getUsers(req.params.id));
 });
 
@@ -54,7 +50,7 @@ router.delete('/:id', permit('admin'), async (req, res) => {
 });
 
 router.post('/login', (req, res, next) => {
-  passport.authenticate('local', { session: false }, (err, user) => {
+  passport.authenticate('local', (err, user) => {
     if (err) {
       if (err instanceof UserNotExistsError) {
         return res.status(401).json({ username: err.message });
@@ -68,12 +64,10 @@ router.post('/login', (req, res, next) => {
       if (error) {
         return res.status(500).json(error);
       }
-      delete user.password;
-      const token = jwt.sign(user.dataValues, config.jwtSecret);
       if (user.role === 'admin') {
-        return res.json({ loggedUser: user.dataValues, token, redirectUri: '/userList' });
+        return res.json({ loggedUser: user, redirectUri: '/userList' });
       }
-      return res.json({ loggedUser: user.dataValues, token, redirectUri: '/chatroom' });
+      return res.json({ loggedUser: user, redirectUri: '/chatroom' });
     });
   })(req, res, next);
 });

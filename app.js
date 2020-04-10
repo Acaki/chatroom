@@ -1,15 +1,12 @@
 const createError = require('http-errors');
 const express = require('express');
 const path = require('path');
+const session = require('express-session');
 const logger = require('morgan');
 const passport = require('passport');
 const LocalStrategy = require('passport-local');
-const passportJWT = require('passport-jwt');
-
-const env = process.env.NODE_ENV || 'development';
-const config = require('../config/config.json')[env];
-const JWTStrategy = passportJWT.Strategy;
-const ExtractJWT = passportJWT.ExtractJwt;
+const SequelizeStore = require('connect-session-sequelize')(session.Store);
+const cors = require('cors');
 const { UserNotExistsError, PasswordInvalidError } = require('./services/error');
 
 const models = require('./models');
@@ -23,11 +20,23 @@ const app = express();
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
+app.use(cors());
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(session(
+  {
+    secret: 'anything',
+    resave: false,
+    saveUninitialized: true,
+    store: new SequelizeStore({
+      db: models.sequelize,
+    }),
+  },
+));
 app.use(passport.initialize());
+app.use(passport.session());
 
 app.use('/', indexRouter);
 app.use('/user', usersRouter);
@@ -64,11 +73,6 @@ passport.use(new LocalStrategy(
     return done(null, user);
   },
 ));
-
-passport.use(new JWTStrategy({
-  jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
-  secretOrKey: config.jwtToken,
-}));
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
