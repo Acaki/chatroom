@@ -1,4 +1,5 @@
 const { User } = require('../models');
+const { DuplicateRegisterError } = require('./error');
 
 module.exports = class UserService {
   static async register(username, password) {
@@ -8,7 +9,7 @@ module.exports = class UserService {
       },
     });
     if (existingUser) {
-      throw new Error('User already exists');
+      throw new DuplicateRegisterError('User already exists');
     }
     return User.create({
       name: username,

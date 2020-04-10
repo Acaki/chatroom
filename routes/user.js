@@ -2,6 +2,7 @@ const express = require('express');
 const passport = require('passport');
 const UserService = require('../services/auth');
 const permit = require('../middlewares/permission');
+const { DuplicateRegisterError, UserNotExistsError, PasswordInvalidError } = require('../services/error');
 
 const router = express.Router();
 
@@ -18,7 +19,7 @@ router.post('/', permit('admin'), async (req, res) => {
     const newUser = await UserService.createUser(req.body.username, req.body.password);
     res.send(newUser);
   } catch (e) {
-    res.status(500).send(e);
+    res.status(303).send(e);
   }
 });
 
@@ -40,13 +41,21 @@ router.delete('/:id', permit('admin'), async (req, res) => {
   res.send('Success.');
 });
 
-
 router.post('/login', (req, res, next) => {
   passport.authenticate('local', (err, user) => {
-    if (err) { return next(err); }
-    if (!user) { return res.redirect('login'); }
+    if (err) {
+      if (err instanceof UserNotExistsError) {
+        return res.status(401).json({ username: err.message });
+      }
+      if (err instanceof PasswordInvalidError) {
+        return res.status(401).json({ password: err.message });
+      }
+      return res.status(500).json(err);
+    }
     return req.logIn(user, (error) => {
-      if (error) { return next(err); }
+      if (error) {
+        return res.status(500).json(error);
+      }
       if (user.role === 'admin') {
         return res.json({ loggedUser: user, redirectUri: '/userList' });
       }
@@ -68,7 +77,11 @@ router.post('/register', async (req, res) => {
     const newUser = await UserService.register(req.body.username, req.body.password);
     return res.json({ loggedUser: newUser, redirectUri: '/chatroom' });
   } catch (e) {
-    res.status(500).send(e);
+    if (e instanceof DuplicateRegisterError) {
+      res.status(303).json({ username: e.message });
+    } else {
+      res.status(500).json(e);
+    }
   }
 });
 

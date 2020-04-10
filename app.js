@@ -7,6 +7,7 @@ const passport = require('passport');
 const LocalStrategy = require('passport-local');
 const SequelizeStore = require('connect-session-sequelize')(session.Store);
 const cors = require('cors');
+const { UserNotExistsError, PasswordInvalidError } = require('./services/error');
 
 const models = require('./models');
 const indexRouter = require('./routes');
@@ -51,12 +52,23 @@ passport.deserializeUser(async (user, done) => {
 
 passport.use(new LocalStrategy(
   async (username, password, done) => {
-    const user = await models.User.scope('withPassword').findOne({
-      where: {
-        name: username,
-      },
-    });
-    if (!user || !await user.validPassword(password)) { return done(null, false); }
+    let user;
+    try {
+      user = await models.User.scope('withPassword').findOne({
+        where: {
+          name: username,
+        },
+      });
+    } catch (e) {
+      return done(e, false);
+    }
+
+    if (!user) {
+      return done(new UserNotExistsError(), false);
+    }
+    if (!await user.validPassword(password)) {
+      return done(new PasswordInvalidError(), false);
+    }
 
     return done(null, user);
   },
