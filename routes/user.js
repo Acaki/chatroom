@@ -28,7 +28,7 @@ router.post('/', async (req, res) => {
     return;
   }
 
-  res.json({ loggedUser: newUser, redirectUri: '/chatroom' });
+  res.json({ loggedUser: newUser, redirectUri: '/' });
 });
 
 router.patch('/:id', (req, res, next) => { permit(req, res, next, 'admin'); }, async (req, res) => {
@@ -67,7 +67,7 @@ router.post('/login', (req, res, next) => {
       if (user.role === 'admin') {
         return res.json({ loggedUser: user, redirectUri: '/userList' });
       }
-      return res.json({ loggedUser: user, redirectUri: '/chatroom' });
+      return res.json({ loggedUser: user, redirectUri: '/' });
     });
   })(req, res, next);
 });
