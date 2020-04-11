@@ -1,0 +1,12 @@
+runtime: nodejs
+service: api
+env: flex
+
+manual_scaling:
+  instances: 1
+
+beta_settings:
+  cloud_sql_instances: practice-272116:asia-east1:postgresql-test-db
+
+network:
+  session_affinity: true
