@@ -28,8 +28,7 @@ router.post('/', async (req, res) => {
     return;
   }
 
-  delete newUser.dataValues.password;
-  res.json({ loggedUser: newUser, redirectUri: '/' });
+  res.json(newUser);
 });
 
 router.patch('/:id', (req, res, next) => { permit(req, res, next, 'admin'); }, async (req, res) => {
