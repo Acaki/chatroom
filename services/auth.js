@@ -22,6 +22,7 @@ module.exports = class UserService {
       return User.findByPk(id);
     }
     return User.findAll({
+      order: [['id', 'ASC']],
       attributes: ['id', 'name', 'role'],
     });
   }
