@@ -1,9 +1,10 @@
 const express = require('express');
+const permit = require('../middlewares/permission');
 const models = require('../models');
 
 const router = express.Router();
 
-router.get('/messages', async (req, res) => {
+router.get('/messages', permit, async (req, res) => {
   const messages = await models.ChatMessages.findAll({
     include: [{ model:models.User, as: 'user' }],
   });
