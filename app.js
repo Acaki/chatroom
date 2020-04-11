@@ -39,8 +39,8 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use('/', indexRouter);
-app.use('/user', usersRouter);
-app.use('/chatroom', chatRoomRouter);
+app.use('/api/user', usersRouter);
+app.use('/api/chatroom', chatRoomRouter);
 
 passport.serializeUser((user, done) => {
   done(null, user.id);
