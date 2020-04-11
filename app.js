@@ -70,6 +70,7 @@ passport.use(new LocalStrategy(
       return done(new PasswordInvalidError(), false);
     }
 
+    delete user.dataValues.password;
     return done(null, user);
   },
 ));
