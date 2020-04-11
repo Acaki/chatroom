@@ -28,6 +28,7 @@ router.post('/', async (req, res) => {
     return;
   }
 
+  delete newUser.dataValues.password;
   res.json({ loggedUser: newUser, redirectUri: '/' });
 });
 
@@ -64,6 +65,7 @@ router.post('/login', (req, res, next) => {
       if (error) {
         return res.status(500).json(error);
       }
+      delete user.dataValues.password;
       if (user.role === 'admin') {
         return res.json({ loggedUser: user, redirectUri: '/userList' });
       }
