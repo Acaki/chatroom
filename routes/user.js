@@ -6,9 +6,15 @@ const { DuplicateRegisterError, UserNotExistsError, PasswordInvalidError } = req
 
 const router = express.Router();
 
-async function createUser(req, res) {
+/* GET users listing. */
+router.get('/:id?', (req, res, next) => { permit(req, res, next, 'admin'); }, async (req, res) => {
+  res.json(await UserService.getUsers(req.params.id));
+});
+
+router.post('/', (req, res, next) => { permit(req, res, next, 'admin'); }, async (req, res) => {
   if (!req.body.username || !req.body.password) {
-    res.status(400).send('Missing parameter(s).');
+    res.sendStatus(400);
+    return;
   }
   let newUser;
   try {
@@ -16,22 +22,16 @@ async function createUser(req, res) {
   } catch (e) {
     if (e instanceof DuplicateRegisterError) {
       res.status(303).json({ username: e.message });
-    } else {
-      res.status(500).json(e);
+      return;
     }
+    res.status(500).json(e);
+    return;
   }
 
-  return res.json({ loggedUser: newUser, redirectUri: '/chatroom' });
-}
-
-/* GET users listing. */
-router.get('/:id?', permit('admin'), async (req, res) => {
-  res.send(await UserService.getUsers(req.params.id));
+  res.json({ loggedUser: newUser, redirectUri: '/chatroom' });
 });
 
-router.post('/', permit('admin'), createUser);
-
-router.patch('/:id', permit('admin'), async (req, res) => {
+router.patch('/:id', (req, res, next) => { permit(req, res, next, 'admin'); }, async (req, res) => {
   try {
     await UserService.updateUser(req.params.id, req.body);
   } catch (e) {
@@ -40,7 +40,7 @@ router.patch('/:id', permit('admin'), async (req, res) => {
   res.send('Success.');
 });
 
-router.delete('/:id', permit('admin'), async (req, res) => {
+router.delete('/:id', (req, res, next) => { permit(req, res, next, 'admin'); }, async (req, res) => {
   try {
     await UserService.deleteUser(req.params.id);
   } catch (e) {
@@ -75,12 +75,6 @@ router.post('/login', (req, res, next) => {
 router.post('/logout', (req, res) => {
   req.logout();
   res.send(null);
-});
-
-router.post('/register', createUser);
-
-router.get('/manage', permit('admin'), (req, res) => {
-  res.send('Access granted!');
 });
 
 module.exports = router;
