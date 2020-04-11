@@ -11,7 +11,7 @@ router.get('/:id?', (req, res, next) => { permit(req, res, next, 'admin'); }, as
   res.json(await UserService.getUsers(req.params.id));
 });
 
-router.post('/', (req, res, next) => { permit(req, res, next, 'admin'); }, async (req, res) => {
+router.post('/', async (req, res) => {
   if (!req.body.username || !req.body.password) {
     res.sendStatus(400);
     return;
